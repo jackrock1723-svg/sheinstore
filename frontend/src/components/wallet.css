@@ -1,0 +1,120 @@
+.wallet-container {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 16px;
+  font-family: "Segoe UI", sans-serif;
+}
+
+.wallet-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.wallet-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 2px solid #007bff;
+}
+
+.wallet-info h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.wallet-info p {
+  margin: 4px 0 0;
+  color: #666;
+}
+
+.wallet-balance-card {
+  background: #f0f8ff;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.wallet-balance-card h3 {
+  margin: 0 0 10px;
+}
+
+.balance {
+  font-size: 28px;
+  font-weight: bold;
+  color: #007bff;
+}
+
+.wallet-history h3 {
+  margin-bottom: 10px;
+}
+
+.wallet-history ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.txn {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.txn-credit .txn-amount {
+  color: green;
+  font-weight: bold;
+}
+
+.txn-debit .txn-amount {
+  color: red;
+  font-weight: bold;
+}
+
+.wallet-withdraw {
+  margin: 20px 0;
+  display: flex;
+  gap: 10px;
+}
+
+.wallet-withdraw input {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+.wallet-withdraw button {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.wallet-withdraw button:hover {
+  background: #1d4ed8;
+}
+
+
+/* Mobile adjustments */
+@media (max-width: 600px) {
+  .wallet-container {
+    padding: 10px;
+  }
+
+  .wallet-avatar {
+    width: 50px;
+    height: 50px;
+  }
+
+  .balance {
+    font-size: 22px;
+  }
+}
