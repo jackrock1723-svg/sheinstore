@@ -31,10 +31,7 @@ const walletRoutes = require("./routes/wallet");
 
 // Initialize app
 const app = express();
-app.use(cors({
-  origin: "http://localhost:3000",
-  credentials: true
-}));
+app.use(cors({ origin: "*" }));
 app.use(
   express.json({
     strict: false,
