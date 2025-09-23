@@ -12,11 +12,12 @@ const fs = require("fs");
 // Models
 const Order = require("./models/order");
 const Wallet = require("./models/wallet");
-const adminAuthRoutes = require("./routes/adminAuth");
-const adminPanelRoutes = require("./routes/adminPanel");
-// ...
+require("./models/seller");
+require("./models/product");
 
 // Routes
+const adminAuthRoutes = require("./routes/adminAuth");
+const adminPanelRoutes = require("./routes/adminPanel");
 const orderRoutes = require("./routes/order");
 const sellerRoutes = require("./routes/seller");
 const adminRoutes = require("./routes/admin");
@@ -26,22 +27,46 @@ const chatRoutes = require("./routes/chat");
 const shipmentRoutes = require("./routes/shipment");
 const shopifyRoutes = require("./routes/shopify");
 const walletRoutes = require("./routes/wallet");
+const webhooksRoutes = require("./routes/webhooks");
 
-
+// Allowed origins
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://cosmic-cannoli-cb773e.netlify.app",
+];
 
 // Initialize app
 const app = express();
-app.use(cors({ origin: "*" }));
+
+// CORS
 app.use(
-  express.json({
-    strict: false,
-    type: "application/json",
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
   })
 );
 
-app.use("/api/wallet", walletRoutes);
+// ------------------ Webhooks ------------------
+// Shopify requires raw body for HMAC validation
+// raw body parser ONLY for webhooks
+app.use("/webhooks", express.raw({ type: "application/json" }), require("./routes/webhooks"));
+
+
+// ------------------ Middlewares ------------------
+app.use(express.json());
+
+// ------------------ Auth/Admin Routes ------------------
 app.use("/api/admin/auth", adminAuthRoutes);
-app.use("/api/admin", adminPanelRoutes); // protected by middleware
+app.use("/api/admin/sellers", adminPanelRoutes);
+app.use("/api/wallet", walletRoutes);
+app.use("/api/shopify", shopifyRoutes);
+app.use("/api/admin", adminRoutes);
 
 // ------------------ AI-powered chat route ------------------
 app.post("/api/chat", async (req, res) => {
@@ -103,8 +128,6 @@ mongoose
   .then(() => console.log("✅ MongoDB connected"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
-require("./models/seller");
-require("./models/product");
 console.log("✅ Models loaded: Seller, Product");
 
 // ------------------ Ensure uploads folder ------------------
@@ -115,7 +138,6 @@ if (!fs.existsSync(uploadsDir)) {
 app.use("/uploads", express.static(uploadsDir));
 
 // ------------------ Cron job for shipments ------------------
-// For dev: every 1 minute. Prod: use "0 * * * *" (hourly) or "0 0 * * *" (daily).
 cron.schedule("*/1 * * * *", async () => {
   console.log("⏰ Cron job running...");
 
@@ -177,10 +199,8 @@ cron.schedule("*/1 * * * *", async () => {
   }
 });
 
-// ------------------ Routes ------------------
-app.use("/api/shopify", shopifyRoutes);
+// ------------------ Other Routes ------------------
 app.use("/api/seller", sellerRoutes);
-app.use("/api/admin", adminRoutes);
 app.use("/api/product", productRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/chat", chatRoutes);

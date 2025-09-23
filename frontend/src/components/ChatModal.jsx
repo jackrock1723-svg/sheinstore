@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import "./chatmodal.css";
+import api from "../utils/api";
+
 
 export default function ChatModal({ open, onClose, order, onConfirmed }) {
   const [messages, setMessages] = useState([]);
@@ -37,7 +39,7 @@ export default function ChatModal({ open, onClose, order, onConfirmed }) {
 
     // 🔍 Products request
     if (lower.includes("product")) {
-      const res = await axios.get("/api/shopify/products/random");
+      const res = await api.get("/api/shopify/products/random");
       const items = res.data || [];
       if (items.length) {
         addBot("Here are some product suggestions:");
@@ -64,7 +66,7 @@ export default function ChatModal({ open, onClose, order, onConfirmed }) {
     }
 
     // 🤖 Default → forward to OpenAI
-    const ai = await axios.post("/api/chat", { message: userMessage });
+    const ai = await api.post("/api/chat", { message: userMessage });
     addBot(ai.data.reply);
 
   } catch (err) {
@@ -88,7 +90,7 @@ export default function ChatModal({ open, onClose, order, onConfirmed }) {
       form.append("price", order?.variants?.[0]?.price || order?.price || 0);
       form.append("earn", ((order?.variants?.[0]?.price || order?.price || 0) * 0.2).toFixed(2));
 
-      const res = await axios.post("/api/shipment/request", form, {
+      const res = await api.post("/api/shipment/request", form, {
         headers: { "Content-Type": "multipart/form-data" }
       });
 

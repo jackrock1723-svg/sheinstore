@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "./wallet.css";
-
+import api from "../utils/api";
 export default function WalletPage() {
   const [wallet, setWallet] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -14,7 +14,7 @@ export default function WalletPage() {
   useEffect(() => {
     const fetchWallet = async () => {
       try {
-        const res = await axios.get(`/api/wallet/${sellerId}`, {
+        const res = await api.get(`/api/wallet/${sellerId}`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {}
         });
         setWallet(res.data);
@@ -34,7 +34,7 @@ export default function WalletPage() {
     }
 
     try {
-      const res = await axios.post(
+      const res = await api.post(
         `/api/wallet/withdraw/${sellerId}`,
         { amount: Number(withdrawAmount), method: "UPI" },
         { headers: token ? { Authorization: `Bearer ${token}` } : {} }
