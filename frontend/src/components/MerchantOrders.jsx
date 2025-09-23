@@ -18,6 +18,14 @@ export default function MerchantOrders() {
       setSeller(window.shopifySeller);
     } 
   }, []);
+  useEffect(() => {
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get("token");
+  if (token) {
+    localStorage.setItem("sellerToken", token);
+    window.history.replaceState({}, document.title, "/merchant"); 
+  }
+}, []);
   
   useEffect(() => {
     saveTokenFromUrl(); // extract token from URL (if present) and store

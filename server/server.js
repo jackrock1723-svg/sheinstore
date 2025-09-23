@@ -67,6 +67,8 @@ app.use("/api/admin/sellers", adminPanelRoutes);
 app.use("/api/wallet", walletRoutes);
 app.use("/api/shopify", shopifyRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/auth", require("./routes/magicAuth"));
+
 
 // ------------------ AI-powered chat route ------------------
 app.post("/api/chat", async (req, res) => {

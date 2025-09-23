@@ -13,8 +13,10 @@ function verifyShopifyWebhook(req, res, buf) {
 }
 router.use((req, res, next) => {
   console.log("📥 Webhook hit:", req.method, req.originalUrl);
+  console.log("📥 Tags received:", data.tags);
   next();
 });
+
 
 
 // ----------------- CREATE -----------------
