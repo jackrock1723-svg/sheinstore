@@ -1,42 +1,65 @@
+// src/components/SellerLogin.jsx
 import React, { useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import "./SellerLogin.css";
 
 export default function SellerLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const nav = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const handleLogin = async () => {
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
     try {
       const res = await axios.post(
-        `${process.env.REACT_APP_BACKEND_URL}/api/seller/auth/login`,
+        `${process.env.REACT_APP_BACKEND_URL}/api/seller/login`,
         { email, password }
       );
+
+      // save token
       localStorage.setItem("sellerToken", res.data.token);
-      window.location.href = "https://sheinstore.online/pages/seller-dashboard";
+
+      // redirect to seller dashboard
+      navigate("/https://sheinstore.online/pages/seller-dashboard");
     } catch (err) {
-      alert(err.response?.data?.error || "Login failed");
-    }   
+      console.error("❌ Login error", err.response?.data || err.message);
+      alert(err.response?.data?.error || "Login failed!");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div style={{ maxWidth: 420, margin: "40px auto", padding: 20, boxShadow: "0 6px 18px rgba(0,0,0,0.08)" }}>
-      <h2>Seller Login</h2>
-      <input
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        style={{ width: "100%", padding: 8, marginBottom: 8 }}
-      />
-      <input
-        placeholder="Password"
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        style={{ width: "100%", padding: 8, marginBottom: 8 }}
-      />
-      <button onClick={handleLogin} style={{ padding: "10px 14px" }}>Login</button>
+    <div className="login-container">
+      <div className="login-card">
+        <h2>Seller Login</h2>
+        <form onSubmit={handleLogin}>
+          <input
+            type="email"
+            placeholder="Email Address"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <button type="submit" disabled={loading}>
+            {loading ? "Logging in..." : "Login"}
+          </button>
+        </form>
+        <p className="note">
+          Don’t have an account? <a href="/seller/register">Register here</a>
+        </p>
+      </div>
     </div>
   );
 }

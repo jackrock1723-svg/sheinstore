@@ -200,7 +200,7 @@ export default function SellerRegistration() {
               <br />
               Status: <b>Pending</b>
             </p>
-            <button className="home-btn" onClick={() => navigate("/")}>
+            <button className="home-btn" onClick={() => navigate("https://sheinstore.online/")}>
               ⬅ Return to Home
             </button>
           </div>
