@@ -28,6 +28,7 @@ const shipmentRoutes = require("./routes/shipment");
 const shopifyRoutes = require("./routes/shopify");
 const walletRoutes = require("./routes/wallet");
 const webhooksRoutes = require("./routes/webhooks");
+const publicSellerRoutes = require("./routes/publicSeller");
 
 // Allowed origins
 const allowedOrigins = [
@@ -53,9 +54,13 @@ app.use(
 );
 
 // ------------------ Webhooks ------------------
-// Shopify requires raw body for HMAC validation
 // raw body parser ONLY for webhooks
 app.use("/webhooks", express.raw({ type: "application/json" }), require("./routes/webhooks"));
+
+// after app initialization and uploads static setup
+app.use("/uploads", express.static(path.join(__dirname, "uploads"))); // you already have this
+
+// Add this line:
 
 
 // ------------------ Middlewares ------------------
@@ -68,6 +73,10 @@ app.use("/api/wallet", walletRoutes);
 app.use("/api/shopify", shopifyRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/auth", require("./routes/magicAuth"));
+app.use("/api/seller/auth", require("./routes/sellerAuth"));
+app.use("/api/public-seller", publicSellerRoutes);
+
+
 
 
 // ------------------ AI-powered chat route ------------------

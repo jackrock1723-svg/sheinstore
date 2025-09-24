@@ -1,7 +1,9 @@
 const express = require("express");
 const router = express.Router();
+const multer = require("multer");
 const Seller = require("../models/seller");
-const bcrypt = require("bcryptjs");
+const bcrypt = require("bcrypt");
+const path = require("path");
 const generateToken = require("../utils/generateToken");
 const authMiddleware = require("../middleware/authMiddleware");
 
@@ -12,36 +14,46 @@ router.get("/dashboard", authMiddleware(["seller"]), (req, res) => {
   });
 });
 
-// 📝 Seller Registration
-router.post("/register", async (req, res) => {
-  try {
-    const { name, email, password, phone, address } = req.body;
 
-    // 1️⃣ Check if seller already exists
-    const existingSeller = await Seller.findOne({ email });
-    if (existingSeller) {
-      return res.status(400).json({ msg: "Email already registered" });
+// storage config for documents
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, "../uploads/sellers"));
+  },
+  filename: (req, file, cb) => {
+    const unique = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, unique + path.extname(file.originalname));
+  },
+});
+
+const upload = multer({ storage });
+
+// Seller Registration with file upload
+router.post("/register", upload.single("document"), async (req, res) => {
+  try {
+    const { storeType, storeName, ownerName, address, pin, phone, email } = req.body;
+
+    if (!storeType || !storeName || !ownerName || !address || !pin || !phone || !email) {
+      return res.status(400).json({ error: "All fields are required" });
     }
 
-    // 2️⃣ Hash password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    // 3️⃣ Create new seller
-    const newSeller = new Seller({
-      name,
-      email,
-      password: hashedPassword,
-      phone,
+    const seller = new Seller({
+      storeType,
+      storeName,
+      name: ownerName,
       address,
-      status: "pending" // 👈 default until admin approves
+      pin,
+      phone,
+      email,
+      document: req.file ? `/uploads/sellers/${req.file.filename}` : null,
+      status: "pending",
     });
 
-    await newSeller.save();
-    res.status(201).json({ msg: "Seller registered, awaiting admin approval" });
-
-  } catch (error) {
-    res.status(500).json({ msg: "Server error", error: error.message });
+    await seller.save();
+    res.status(201).json({ message: "Seller registered successfully", seller });
+  } catch (err) {
+    console.error("❌ Seller register error", err);
+    res.status(500).json({ error: "Server error" });
   }
 });
 
@@ -78,7 +90,7 @@ router.post("/login", async (req, res) => {
     }
 
     if (seller.status !== "approved") {
-      return res.status(403).json({ error: `Access denied. Current status: ${seller.status}` });
+      return res.status(403).json({ error: `Access denied. Status: ${seller.status}` });
     }
 
     const isMatch = await bcrypt.compare(password, seller.password);
@@ -99,7 +111,8 @@ router.post("/login", async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Seller login error", err);
+    res.status(500).json({ error: "Server error" });
   }
 });
 

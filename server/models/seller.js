@@ -1,19 +1,32 @@
+// models/seller.js
 const mongoose = require("mongoose");
 
-// models/seller.js (add fields)
-const sellerSchema = new mongoose.Schema({
-  name: String,
-  email: { type: String, required: true, unique: true },
-  password: String, // keep for manual registration fallback if needed
-  phone: String,
-  address: String,
-  status: { type: String, enum: ["pending","approved","rejected"], default: "pending" },
-  role: { type: String, enum: ["seller","admin"], default: "seller" },
+const sellerSchema = new mongoose.Schema(
+  {
+    storeType: { type: String, enum: ["Individual", "Enterprise"], required: true },
+    storeName: { type: String, required: true },
+    name: { type: String, required: true }, // owner name
+    address: { type: String, required: true },
+    pincode: { type: String, required: true },
+    phone: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
 
-  // NEW fields:
-  shopifyCustomerId: { type: String, index: true, sparse: true },
-  shopDomain: String, // e.g. "your-store.myshopify.com"
-}, { timestamps: true });
+    // 👇 NEW
+    password: { type: String, required: true },
 
-module.exports = mongoose.models.Seller || mongoose.model("Seller", sellerSchema);
+    status: {
+      type: String,
+      enum: ["pending", "approved", "rejected"],
+      default: "pending",
+    },
+    role: { type: String, enum: ["seller", "admin"], default: "seller" },
 
+    idDocument: {
+      type: { type: String, enum: ["Aadhar", "PAN", "Passport"], default: null },
+      url: { type: String, default: null },
+    },
+  },
+  { timestamps: true }
+);
+
+module.exports = mongoose.model("Seller", sellerSchema);

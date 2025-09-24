@@ -1,42 +1,31 @@
 // scripts/seed_admin.js
 require("dotenv").config();
 const mongoose = require("mongoose");
-const bcrypt = require("bcryptjs");
-const Seller = require("../models/seller");
+const bcrypt = require("bcrypt");
+const Seller = require("../models/seller"); // 👈 FIXED path
 
-async function createAdmin() {
+(async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(process.env.MONGO_URI);
 
-    const email = "shein@store.com";
-    const password = "AdminPass123!";
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashed = await bcrypt.hash("AdminPass123!", 10);
 
-    let admin = await Seller.findOne({ email, role: "admin" });
-
-    if (!admin) {
-      admin = new Seller({
+    const admin = await Seller.findOneAndUpdate(
+      { email: "shein@store.com" },
+      {
         name: "Super Admin",
-        email,
-        password: hashedPassword,
-        role: "admin", // ✅ Important
-        status: "approved", // so it's active
-      });
+        email: "shein@store.com",
+        password: hashed,
+        role: "admin",
+        status: "approved",
+      },
+      { upsert: true, new: true }
+    );
 
-      await admin.save();
-      console.log("✅ Admin created:", email, "password:", password);
-    } else {
-      console.log("ℹ️ Admin already exists:", email);
-    }
-
-    mongoose.disconnect();
+    console.log("✅ Admin seeded:", admin);
+    process.exit();
   } catch (err) {
-    console.error("❌ Error creating admin:", err);
-    mongoose.disconnect();
+    console.error("❌ Error seeding admin:", err);
+    process.exit(1);
   }
-}
-
-createAdmin();
+})();

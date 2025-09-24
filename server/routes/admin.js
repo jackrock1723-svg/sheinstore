@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const bcrypt = require("bcryptjs");
+const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");   // ✅ Add this
 const Seller = require("../models/seller"); // ✅ Capital S
 const authMiddleware = require("../middleware/authMiddleware");
