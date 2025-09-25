@@ -8,7 +8,6 @@ export default function SellerLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -20,11 +19,12 @@ export default function SellerLogin() {
         { email, password }
       );
 
-      // save token
+      // ✅ Save token locally (for custom app use)
       localStorage.setItem("sellerToken", res.data.token);
 
-      // redirect to seller dashboard
-      window.location.href = "https://sheinstore.online/pages/seller-dashboard";
+      // ✅ Redirect to Shopify dashboard WITH token in query
+      const token = encodeURIComponent(res.data.token);
+      window.location.href = `https://sheinstore.online/pages/seller-dashboard?token=${token}`;
     } catch (err) {
       console.error("❌ Login error", err.response?.data || err.message);
       alert(err.response?.data?.error || "Login failed!");
