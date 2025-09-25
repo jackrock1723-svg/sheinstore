@@ -1,6 +1,5 @@
-// src/components/SellerLogin.jsx
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom"; // ✅ import
 import axios from "axios";
 import "./SellerLogin.css";
 
@@ -8,6 +7,7 @@ export default function SellerLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate(); // ✅ hook
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -19,12 +19,10 @@ export default function SellerLogin() {
         { email, password }
       );
 
-      // ✅ Save token locally (for custom app use)
       localStorage.setItem("sellerToken", res.data.token);
 
-      // ✅ Redirect to Shopify dashboard WITH token in query
-      const token = encodeURIComponent(res.data.token);
-      window.location.href = `https://sheinstore.online/pages/seller-dashboard?token=${token}`;
+      // ✅ redirect using React Router
+      navigate("/seller/dashboard");
     } catch (err) {
       console.error("❌ Login error", err.response?.data || err.message);
       alert(err.response?.data?.error || "Login failed!");

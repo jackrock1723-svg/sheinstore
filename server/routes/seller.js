@@ -6,6 +6,7 @@ const Seller = require("../models/seller");
 const bcrypt = require("bcrypt");
 const path = require("path");
 const generateToken = require("../utils/generateToken");
+const authSeller = require("../middleware/authMiddleware");
 
 
 // 🛡️ Protected seller route
@@ -13,6 +14,16 @@ router.get("/dashboard", authMiddleware(["seller"]), (req, res) => {
   res.json({
     message: `Welcome ${req.user.id}, role: ${req.user.role}`,
   });
+});
+
+// get logged in seller profile
+router.get("/me", authSeller(["seller"]), async (req, res) => {
+  try {
+    const seller = await Seller.findById(req.user.id).select("-password");
+    res.json(seller);
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
 });
 
 
