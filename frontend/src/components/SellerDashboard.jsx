@@ -12,6 +12,11 @@ import {
   User,
   LogOut,
   CheckCircle,
+  Home,
+  Grid,
+  Search,
+  ShoppingCart,
+  UserCircle,
 } from "lucide-react";
 
 const Dashboard = () => {
@@ -29,86 +34,94 @@ const Dashboard = () => {
   ];
 
   const products = [
-    { title: "Premium Jacket", price: "$59.99", img: "https://source.unsplash.com/300x400/?jacket" },
-    { title: "Casual Sneakers", price: "$45.00", img: "https://source.unsplash.com/300x400/?sneakers" },
-    { title: "Classic Watch", price: "$120.00", img: "https://source.unsplash.com/300x400/?watch" },
-    { title: "Leather Bag", price: "$89.00", img: "https://source.unsplash.com/300x400/?bag" },
-    { title: "Sunglasses", price: "$35.00", img: "https://source.unsplash.com/300x400/?sunglasses" },
-    { title: "Headphones", price: "$75.00", img: "https://source.unsplash.com/300x400/?headphones" },
+    { title: "Premium Jacket", price: "$59.99", img: "/images/p1.png" },
+    { title: "Casual Sneakers", price: "$45.00", img: "/images/p2.png" },
+    { title: "Classic Watch", price: "$120.00", img: "/images/p3.png" },
+    { title: "Leather Bag", price: "$89.00", img: "/images/p4.png" },
+    { title: "Sunglasses", price: "$35.00", img: "/images/p5.png" },
+    { title: "Headphones", price: "$75.00", img: "/images/p6.png" },
   ];
 
   return (
     <div className="dashboard-container">
-      {/* Header */}
-      <header className="dashboard-header">
-        <div className="logo">SHEIN</div>
-        <div className="seller-name">{sellerName}</div>
-        <div className="profile-section">
-          <span className="verified">
-            <CheckCircle size={16} /> Verified Seller
-          </span>
-          <div
-            className="profile-avatar"
-            onClick={() => setDropdownOpen(!dropdownOpen)}
-          >
-            IN
+      {/* Black Banner */}
+      <header className="dashboard-top" role="banner">
+        <div className="top-left">
+          {/* Avatar with initials */}
+          <div className="avatar-placeholder">IN</div>
+
+          <div className="seller-info">
+            <h2 className="seller-name">{sellerName}</h2>
+            <p className="status">
+              <CheckCircle size={14} /> <span className="status-text">Verified Seller</span>
+            </p>
           </div>
+        </div>
+
+        <div className="top-right" aria-haspopup="true">
+          {/* Profile svg icon (click opens dropdown) */}
+          <button
+            className="profile-icon-btn"
+            onClick={() => setDropdownOpen(!dropdownOpen)}
+            aria-label="Profile menu"
+          >
+            <UserCircle size={28} className="profile-icon-svg" />
+          </button>
 
           {dropdownOpen && (
             <motion.div
-              initial={{ opacity: 0, y: -10 }}
+              initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
+              exit={{ opacity: 0, y: -8 }}
               className="dropdown-menu"
             >
-              <button><User size={16}/> My Profile</button>
-              <button
-  onClick={() => {
-    localStorage.removeItem("sellerToken");
-    window.location.href = "/seller/login"; // redirect to login
-  }}
->
-  <LogOut size={16}/> Logout
-</button>
+              <button className="dd-item"><User size={16} /> <span>My Profile</span></button>
+              <hr />
+              <button className="dd-item"><LogOut size={16} /> <span>Logout</span></button>
             </motion.div>
           )}
         </div>
       </header>
-
-      {/* Hero Section */}
-      <section className="dashboard-hero">
-        <div className="hero-content">
-          <h1>Welcome back, {sellerName}!</h1>
-          <p>Manage your store, track orders, and grow your sales.</p>
+      {/* Coupon Section */}
+      <section className="coupon-section">
+        <div className="coupon-card">
+          <div>
+            <h3>Coupon</h3>
+            <p>Collect coupons and save on your orders</p>
+          </div>
+          <button className="claim-btn">Claim</button>
         </div>
       </section>
 
-      {/* Quick Actions */}
-      <section className="features-section">
-        {features.map((f, i) => (
-          <motion.div whileHover={{ scale: 1.05 }} key={i} className="feature-card">
-            <f.icon size={30} />
-            <p>{f.title}</p>
-          </motion.div>
-        ))}
-      </section>
-
-      {/* Products */}
-      <section className="products-section">
-        <h2>Featured Products</h2>
-        <div className="products-grid">
-          {products.map((p, i) => (
-            <motion.div whileHover={{ scale: 1.05 }} key={i} className="product-card">
-              <img src={p.img} alt={p.title} />
-              <h3>{p.title}</h3>
-              <p>{p.price}</p>
+      {/* content wrapper */}
+      <main className="content-wrapper">
+        {/* Features Grid */}
+        <section className="features-section" aria-label="Quick actions">
+          {features.map((f, i) => (
+            <motion.div whileHover={{ scale: 1.03 }} key={i} className="feature-card" role="button">
+              <f.icon size={28} />
+              <p className="feature-title">{f.title}</p>
             </motion.div>
           ))}
-        </div>
-      </section>
+        </section>
 
-      {/* Footer */}
-      <footer className="dashboard-footer">
+        {/* Products */}
+        <section className="products-section" aria-label="Featured products">
+          <h2>Featured Products</h2>
+          <div className="products-grid">
+            {products.map((p, i) => (
+              <motion.div whileHover={{ scale: 1.03 }} key={i} className="product-card">
+                <img src={p.img} alt={p.title} />
+                <h3>{p.title}</h3>
+                <p className="price">{p.price}</p>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+      </main>
+
+      {/* Footer (Desktop only) */}
+      <footer className="dashboard-footer" role="contentinfo">
         <div className="footer-columns">
           <div>
             <h4>Quick Links</h4>
@@ -146,6 +159,15 @@ const Dashboard = () => {
         </div>
         <p>© 2025 SHEIN, Powered by Shopify</p>
       </footer>
+
+      {/* Bottom Nav (mobile only) */}
+      <nav className="bottom-nav" role="navigation" aria-label="Mobile navigation">
+        <div className="nav-item"><Home size={20} /><span>Home</span></div>
+        <div className="nav-item"><Grid size={20} /><span>Category</span></div>
+        <div className="nav-item"><Search size={20} /><span>Find</span></div>
+        <div className="nav-item"><ShoppingCart size={20} /><span>Cart</span></div>
+        <div className="nav-item"><UserCircle size={20} /><span>My</span></div>
+      </nav>
     </div>
   );
 };
