@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import "./Dashboard.css";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+
 import {
   ShoppingBag,
   Wallet,
@@ -19,12 +21,15 @@ import {
   UserCircle,
 } from "lucide-react";
 
+
+
 const Dashboard = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const sellerName = "John Doe"; // Replace with dynamic seller name
+  const navigate = useNavigate();
 
   const features = [
-    { icon: User, title: "Merchant" },
+    { icon: User, title: "Merchant",path: "/merchant" },
     { icon: ShoppingBag, title: "Orders" },
     { icon: Wallet, title: "Wallet" },
     { icon: MapPin, title: "Address" },
@@ -78,7 +83,14 @@ const Dashboard = () => {
             >
               <button className="dd-item"><User size={16} /> <span>My Profile</span></button>
               <hr />
-              <button className="dd-item"><LogOut size={16} /> <span>Logout</span></button>
+              <button className="dd-item"
+  onClick={() => {
+    localStorage.removeItem("sellerToken");
+    window.location.href = "/seller/login"; // redirect to login
+  }}
+>
+  <LogOut size={16}/> Logout
+</button>
             </motion.div>
           )}
         </div>
@@ -99,7 +111,7 @@ const Dashboard = () => {
         {/* Features Grid */}
         <section className="features-section" aria-label="Quick actions">
           {features.map((f, i) => (
-            <motion.div whileHover={{ scale: 1.03 }} key={i} className="feature-card" role="button">
+            <motion.div whileHover={{ scale: 1.03 }} key={i} className="feature-card" role="button" onClick={() => navigate(f.path)}>
               <f.icon size={28} />
               <p className="feature-title">{f.title}</p>
             </motion.div>

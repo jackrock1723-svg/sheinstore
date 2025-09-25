@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import SellerLogin from "./components/SellerLogin";
 import SellerRegistration from "./components/SellerRegistration";
 import Dashboard from "./components/SellerDashboard"; // ✅ import your new dashboard
+import MerchantOrders from "./components/MerchantOrders";
 
 // Protect Seller routes
 function ProtectedSeller({ children }) {
@@ -20,6 +21,8 @@ function App() {
       <Routes>
         <Route path="/seller/login" element={<SellerLogin />} />
         <Route path="/seller/register" element={<SellerRegistration />} />
+        <Route path="/merchant" element={<MerchantOrders />} />
+
 
         {/* ✅ Protected Seller Dashboard */}
         <Route
