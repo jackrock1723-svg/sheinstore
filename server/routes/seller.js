@@ -57,6 +57,19 @@ router.post("/register", upload.single("document"), async (req, res) => {
   }
 });
 
+router.get("/me", authSeller(["seller"]), async (req, res) => {
+  try {
+    const seller = await Seller.findById(req.user.id).select("-password");
+    if (!seller) return res.status(404).json({ error: "Seller not found" });
+    res.json(seller);
+  } catch (err) {
+    console.error("❌ /me error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+
+
 // ✅ Approve seller
 router.put("/approve/:id", async (req, res) => {
   try {
