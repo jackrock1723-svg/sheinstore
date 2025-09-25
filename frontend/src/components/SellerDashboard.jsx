@@ -24,6 +24,7 @@ const Dashboard = () => {
   const sellerName = "John Doe"; // Replace with dynamic seller name
 
   const features = [
+    { icon: User, title: "Merchant" },
     { icon: ShoppingBag, title: "Orders" },
     { icon: Wallet, title: "Wallet" },
     { icon: MapPin, title: "Address" },
