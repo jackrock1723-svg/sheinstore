@@ -75,6 +75,8 @@ app.use("/api/admin", adminRoutes);
 app.use("/auth", require("./routes/magicAuth"));
 app.use("/api/seller/auth", require("./routes/sellerAuth"));
 app.use("/api/public-seller", publicSellerRoutes);
+app.use('/auth', require('./routes/auth'));
+
 
 
 

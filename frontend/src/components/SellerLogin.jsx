@@ -24,7 +24,7 @@ export default function SellerLogin() {
       localStorage.setItem("sellerToken", res.data.token);
 
       // redirect to seller dashboard
-      navigate("/https://sheinstore.online/pages/seller-dashboard");
+      window.location.href = "https://sheinstore.online/pages/seller-dashboard";
     } catch (err) {
       console.error("❌ Login error", err.response?.data || err.message);
       alert(err.response?.data?.error || "Login failed!");
