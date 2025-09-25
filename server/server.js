@@ -225,6 +225,20 @@ app.get("/", (req, res) => {
   res.send("Backend working 🚀");
 });
 
+// Ensure all errors still return CORS headers
+app.use((err, req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*"); // or allowedOrigins[0] if you want strict
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+
+  if (err instanceof Error) {
+    console.error("❌ Global error handler:", err.message);
+    return res.status(500).json({ error: err.message });
+  }
+
+  next();
+});
+
+
 // ------------------ Start server ------------------
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
