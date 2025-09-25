@@ -1,11 +1,12 @@
 const express = require("express");
+const authMiddleware = require("../middleware/authMiddleware");
 const router = express.Router();
 const multer = require("multer");
 const Seller = require("../models/seller");
 const bcrypt = require("bcrypt");
 const path = require("path");
 const generateToken = require("../utils/generateToken");
-const authMiddleware = require("../middleware/authMiddleware");
+
 
 // 🛡️ Protected seller route
 router.get("/dashboard", authMiddleware(["seller"]), (req, res) => {
@@ -57,16 +58,20 @@ router.post("/register", upload.single("document"), async (req, res) => {
   }
 });
 
-router.get("/me", authSeller(["seller"]), async (req, res) => {
+router.get("/me", authMiddleware(["seller"]), async (req, res) => {
   try {
-    const seller = await Seller.findById(req.user.id).select("-password");
-    if (!seller) return res.status(404).json({ error: "Seller not found" });
-    res.json(seller);
+    res.json({
+      id: req.user.id,
+      role: req.user.role,
+      email: req.user.email || null,
+      message: "Seller authenticated successfully"
+    });
   } catch (err) {
-    console.error("❌ /me error:", err);
+    console.error("❌ /me route error", err);
     res.status(500).json({ error: "Server error" });
   }
 });
+
 
 
 
