@@ -1,17 +1,15 @@
 // src/admin/AdminDashboard.jsx
 import React from "react";
-import { NavLink, Routes, Route, useNavigate } from "react-router-dom";
-import SellersPage from "./SellersPage";
-import UsersPage from "./UsersPage";
-import MerchantsPage from "./MerchantsPage";
-import WalletsPage from "./WalletsPage";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem("adminToken");
-    navigate("/admin/login"); // redirect to login page
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("role");
+    localStorage.removeItem("admin");
+    navigate("/admin/login");
   };
 
   return (
@@ -30,24 +28,27 @@ export default function AdminDashboard() {
       >
         <div>
           <h2 style={{ marginBottom: 20 }}>Admin Panel</h2>
-          <nav style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {/* Use absolute paths so they don't stack */}
-            <NavLink to="/admin/sellers" style={{ color: "#fff" }}>
-              👨‍💼 Sellers
-            </NavLink>
-            <NavLink to="/admin/users" style={{ color: "#fff" }}>
-              👥 Users
-            </NavLink>
-            <NavLink to="/admin/merchants" style={{ color: "#fff" }}>
-              🛒 Merchants
-            </NavLink>
-            <NavLink to="/admin/wallets" style={{ color: "#fff" }}>
-              💰 Wallets
-            </NavLink>
-          </nav>
+          {/* Sidebar */}
+<nav style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+  <NavLink to="/admin/dashboard/sellers" style={{ color: "#fff" }}>
+    👨‍💼 Sellers
+  </NavLink>
+  <NavLink to="/admin/dashboard/users" style={{ color: "#fff" }}>
+    👥 Users
+  </NavLink>
+  <NavLink to="/admin/dashboard/merchants" style={{ color: "#fff" }}>
+    🛒 Merchants
+  </NavLink>
+  <NavLink to="/admin/dashboard/wallets" style={{ color: "#fff" }}>
+    💰 Wallets
+  </NavLink>
+  <NavLink to="/admin/dashboard/withdrawals" style={{ color: "#fff" }}>
+    💸 Withdrawals
+  </NavLink>
+</nav>
+
         </div>
 
-        {/* Logout button at bottom */}
         <button
           onClick={handleLogout}
           style={{
@@ -67,16 +68,7 @@ export default function AdminDashboard() {
       {/* Main Content */}
       <div style={{ flex: 1, padding: 20 }}>
         <h1>Welcome Admin 👋</h1>
-        <Routes>
-          <Route path="sellers" element={<SellersPage />} />
-          <Route path="users" element={<UsersPage />} />
-          <Route path="merchants" element={<MerchantsPage />} />
-          <Route path="wallets" element={<WalletsPage />} />
-          <Route
-            path="*"
-            element={<div>Select a section from the sidebar</div>}
-          />
-        </Routes>
+        <Outlet /> {/* ✅ Nested routes render here */}
       </div>
     </div>
   );

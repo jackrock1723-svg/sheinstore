@@ -1,3 +1,4 @@
+// server/routes/shipment.js
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
@@ -7,14 +8,15 @@ const fs = require("fs");
 const Order = require("../models/order");
 const Wallet = require("../models/wallet");
 const Seller = require("../models/seller");
+const authMiddleware = require("../middleware/authMiddleware");
 
-// 🔹 Ensure uploads directory exists
-const uploadPath = path.join(__dirname, "..", "uploads");
+// ------------------ Ensure uploads dir ------------------
+const uploadPath = path.join(__dirname, "..", "uploads", "payment_proofs");
 if (!fs.existsSync(uploadPath)) {
   fs.mkdirSync(uploadPath, { recursive: true });
 }
 
-// 🔹 Configure Multer for screenshots
+// ------------------ Multer setup ------------------
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadPath),
   filename: (req, file, cb) => {
@@ -24,16 +26,22 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
+// ------------------ Seller requests shipment + uploads payment proof ------------------
 /**
- * 👉 Seller requests shipment and uploads payment screenshot
- * Fields: sellerId, productId, productTitle, price, earn
+ * POST /api/shipment/request
+ * Fields: productId, productTitle, price, earn
+ * File: screenshot
  */
-router.post("/request", upload.single("screenshot"), async (req, res) => {
+router.post("/request", authMiddleware(["seller"]), upload.single("screenshot"), async (req, res) => {
   try {
-    const { sellerId, productId, productTitle, price, earn } = req.body;
-    const screenshotUrl = req.file ? `/uploads/${req.file.filename}` : null;
+    const { productId, productTitle, price, earn } = req.body;
+    const sellerId = req.user.id; // ✅ get from token
+    const screenshotUrl = req.file ? `/uploads/payment_proofs/${req.file.filename}` : null;
 
-    // Create new order
+    if (!productId || !productTitle) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
     const order = new Order({
       sellerId,
       productId,
@@ -43,7 +51,6 @@ router.post("/request", upload.single("screenshot"), async (req, res) => {
       status: "payment_pending",
       payment: {
         method: "UPI",
-        upiId: process.env.PAYMENT_UPI_ID || "merchantupi@okaxis", // ✅ from env
         screenshotUrl,
         status: "pending",
       },
@@ -51,39 +58,14 @@ router.post("/request", upload.single("screenshot"), async (req, res) => {
     });
 
     await order.save();
-
-    // 🔎 Simple auto-verification (simulated)
-    const isLikelyValid =
-      req.file && req.file.size > 5 * 1024 && Number(price) > 0;
-
-    if (isLikelyValid) {
-      order.payment.status = "verified";
-      order.payment.verifiedAt = new Date();
-      order.status = "payment_verified";
-
-      // Simulate shipping started
-      order.shipment.shippedAt = new Date();
-      order.status = "shipped";
-
-      await order.save();
-    }
-
-    res.status(201).json({
-      message: "Shipment request created",
-      upiId: process.env.PAYMENT_UPI_ID || "merchantupi@okaxis",
-      order,
-    });
+    res.status(201).json({ message: "Order created", order });
   } catch (err) {
     console.error("❌ shipment request error", err);
-    res.status(500).json({ error: "Failed to create shipment request" });
+    res.status(500).json({ error: "Failed to create order" });
   }
 });
 
-/**
- * 👉 Admin or automated verification (manual override)
- * POST /api/shipment/verify/:orderId
- * body: { action: "verify" | "reject" }
- */
+// ------------------ Admin manually verifies or rejects payment ------------------
 router.post("/verify/:orderId", async (req, res) => {
   try {
     const { orderId } = req.params;
@@ -96,18 +78,21 @@ router.post("/verify/:orderId", async (req, res) => {
       order.payment.status = "verified";
       order.payment.verifiedAt = new Date();
       order.status = "payment_verified";
+
+      // start shipment
       order.shipment.shippedAt = new Date();
       order.status = "shipped";
       await order.save();
 
       return res.json({
-        message: "✅ Payment verified and shipment started",
+        message: "✅ Payment verified. Shipment started.",
         order,
       });
     } else {
       order.payment.status = "rejected";
       order.status = "cancelled";
       await order.save();
+
       return res.json({ message: "❌ Payment rejected", order });
     }
   } catch (err) {
@@ -116,9 +101,7 @@ router.post("/verify/:orderId", async (req, res) => {
   }
 });
 
-/**
- * 👉 Fetch all seller orders
- */
+// ------------------ Fetch all seller orders ------------------
 router.get("/seller/:sellerId", async (req, res) => {
   try {
     const orders = await Order.find({ sellerId: req.params.sellerId }).sort({

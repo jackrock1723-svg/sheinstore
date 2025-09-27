@@ -1,104 +1,123 @@
 import React, { useState, useEffect, useRef } from "react";
-import axios from "axios";
-import "./chatmodal.css";
 import api from "../utils/api";
-
+import "./chatmodal.css";
 
 export default function ChatModal({ open, onClose, order, onConfirmed }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef(null);
+
+  // ✅ fetch sellerId from localStorage
   const sellerId = localStorage.getItem("sellerId");
 
   useEffect(() => {
-    if (open) {
+    if (open && order) {
       setMessages([
-        { from: "bot", text: "👋 Hi! I’m your shipment assistant. You can ask me about products, payments, or shipments." },
-        order && { from: "bot", text: `📦 You selected: ${order.title || order.productName}` },
-        order && { from: "bot", text: `💰 Price: ₹${order.variants?.[0]?.price || order.price || 0}` },
-        order && { from: "bot", text: `🪙 You will earn: ₹${((order.variants?.[0]?.price || order.price || 0) * 0.2).toFixed(2)}` }
-      ].filter(Boolean));
+        {
+          from: "bot",
+          text: "👋 Hi! I’m your shipment assistant. You can ask me about products, payments, or shipments.",
+        },
+        { from: "bot", text: `📦 Order: ${order.productName || order.title}` },
+        {
+          from: "bot",
+          text: `💰 Price: ₹${order.price || order.variants?.[0]?.price}`,
+        },
+        {
+          from: "bot",
+          text: `🪙 You will earn: ₹${(
+            (order.price || order.variants?.[0]?.price || 0) * 0.2
+          ).toFixed(2)}`,
+        },
+      ]);
     }
   }, [open, order]);
 
   const addBot = (text) => setMessages((m) => [...m, { from: "bot", text }]);
   const addUser = (text) => setMessages((m) => [...m, { from: "user", text }]);
 
+  const UPI_ID = "pray551999@ibl"; // ⚡ Replace with real merchant UPI
 
-  const UPI_ID = "pray551999@ibl"; // 🔹 Replace with your real UPI
-
+  // --- send message logic ---
   const handleSend = async () => {
-  if (!input.trim()) return;
-  const userMessage = input.trim();
-  addUser(userMessage);
-  setInput("");
+    if (!input.trim()) return;
+    const userMessage = input.trim();
+    addUser(userMessage);
+    setInput("");
 
-  try {
-    const lower = userMessage.toLowerCase();
+    try {
+      const lower = userMessage.toLowerCase();
 
-    // 🔍 Products request
-    if (lower.includes("product")) {
-      const res = await api.get("/api/shopify/products/random");
-      const items = res.data || [];
-      if (items.length) {
-        addBot("Here are some product suggestions:");
-        items.slice(0, 3).forEach((p) => {
-          const price = p.variants?.[0]?.price || "N/A";
-          const earn = (price * 0.2).toFixed(2);
-          addBot(`🛍️ ${p.title} | ₹${price} | Earn: ₹${earn}`);
-        });
-      } else {
-        addBot("No products found right now.");
+      if (lower.includes("product")) {
+        const res = await api.get("/api/shopify/products/random");
+        const items = res.data || [];
+        if (items.length) {
+          addBot("Here are some product suggestions:");
+          items.slice(0, 3).forEach((p) => {
+            const price = p.variants?.[0]?.price || "N/A";
+            const earn = (price * 0.2).toFixed(2);
+            addBot(`🛍️ ${p.title} | ₹${price} | Earn: ₹${earn}`);
+          });
+        } else {
+          addBot("No products found right now.");
+        }
+        return;
       }
-      return;
+
+      if (
+        lower.includes("upi") ||
+        lower.includes("payment") ||
+        lower.includes("pay")
+      ) {
+        addBot(`💳 You can pay via UPI: **${UPI_ID}**`);
+        addBot("📤 After payment, please upload your screenshot here.");
+        return;
+      }
+
+      // default → send to AI
+      const ai = await api.post("/api/chat", { message: userMessage });
+      addBot(ai.data.reply);
+    } catch (err) {
+      console.error("chat error", err);
+      addBot("⚠️ Something went wrong. Try again.");
     }
+  };
 
-    // 💳 Payment / UPI request
-    if (
-      lower.includes("upi") ||
-      lower.includes("payment") ||
-      lower.includes("pay")
-    ) {
-      addBot(`You can pay using this UPI ID: 👉 ${UPI_ID}`);
-      addBot("After payment, please upload your payment screenshot here.");
-      return;
-    }
-
-    // 🤖 Default → forward to OpenAI
-    const ai = await api.post("/api/chat", { message: userMessage });
-    addBot(ai.data.reply);
-
-  } catch (err) {
-    console.error("chat error", err);
-    addBot("⚠️ Something went wrong. Try again.");
-  }
-};
-
+  // --- handle proof upload ---
   const handleFile = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
+    if (!sellerId) {
+      addBot("⚠️ Seller ID missing. Please log in again.");
+      return;
+    }
+
     setUploading(true);
     addUser("📤 Uploaded payment screenshot.");
 
     try {
       const form = new FormData();
-      form.append("screenshot", file);
-      form.append("sellerId", sellerId);
+      form.append("screenshot", file); // ✅ must match backend
+      form.append("sellerId", sellerId); // ✅ ensure sellerId is included
       form.append("productId", order?.id || order?._id || "");
       form.append("productTitle", order?.title || order?.productName);
       form.append("price", order?.variants?.[0]?.price || order?.price || 0);
-      form.append("earn", ((order?.variants?.[0]?.price || order?.price || 0) * 0.2).toFixed(2));
+      form.append(
+        "earn",
+        ((order?.variants?.[0]?.price || order?.price || 0) * 0.2).toFixed(2)
+      );
 
       const res = await api.post("/api/shipment/request", form, {
-        headers: { "Content-Type": "multipart/form-data" }
+        headers: { "Content-Type": "multipart/form-data" },
       });
 
-      addBot("✅ Payment screenshot uploaded. Waiting for verification...");
-      onConfirmed(res.data.order);
-
+      addBot(
+        "✅ Payment screenshot uploaded successfully. Waiting for admin verification..."
+      );
+      if (onConfirmed) onConfirmed(res.data.order);
     } catch (err) {
-      console.error("upload error", err);
+      console.error("upload error", err.response?.data || err.message);
       addBot("⚠️ Upload failed. Please try again.");
     } finally {
       setUploading(false);
@@ -112,12 +131,17 @@ export default function ChatModal({ open, onClose, order, onConfirmed }) {
       <div className="chatmodal">
         <div className="chat-header">
           <h3>SHEIN Support 🤖</h3>
-          <button onClick={onClose} className="close-btn">×</button>
+          <button onClick={onClose} className="close-btn">
+            ×
+          </button>
         </div>
 
         <div className="chat-body">
           {messages.map((m, i) => (
-            <div key={i} className={`chat-msg ${m.from === "bot" ? "bot" : "user"}`}>
+            <div
+              key={i}
+              className={`chat-msg ${m.from === "bot" ? "bot" : "user"}`}
+            >
               {m.text}
             </div>
           ))}

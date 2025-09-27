@@ -1,5 +1,6 @@
+// src/components/SellerLogin.jsx
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // ✅ import
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./SellerLogin.css";
 
@@ -7,7 +8,7 @@ export default function SellerLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate(); // ✅ hook
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -19,9 +20,14 @@ export default function SellerLogin() {
         { email, password }
       );
 
+      // ✅ Standardize localStorage keys to match App.js
       localStorage.setItem("sellerToken", res.data.token);
+      localStorage.setItem("role", "seller");
+      localStorage.setItem("seller", JSON.stringify(res.data.seller));
+      localStorage.setItem("sellerId", res.data.seller.id || res.data.seller._id); // ✅ Save sellerId
 
-      // ✅ redirect using React Router
+
+      // Redirect to dashboard
       navigate("/seller/dashboard");
     } catch (err) {
       console.error("❌ Login error", err.response?.data || err.message);

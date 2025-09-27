@@ -21,17 +21,16 @@ import {
   UserCircle,
 } from "lucide-react";
 
-
-
 const Dashboard = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const sellerName = "John Doe"; // Replace with dynamic seller name
+  const seller = JSON.parse(localStorage.getItem("seller"));
+  const sellerName = seller?.name || "Unknown Seller"; // ✅ use real seller if available
   const navigate = useNavigate();
 
   const features = [
-    { icon: User, title: "Merchant",path: "/merchant" },
+    { icon: User, title: "Merchant", path: "/merchant" },
     { icon: ShoppingBag, title: "Orders" },
-    { icon: Wallet, title: "Wallet" },
+    { icon: Wallet, title: "Wallet", path: "/wallet" },
     { icon: MapPin, title: "Address" },
     { icon: Package, title: "Products" },
     { icon: Settings, title: "Settings" },
@@ -48,18 +47,31 @@ const Dashboard = () => {
     { title: "Headphones", price: "$75.00", img: "/images/p6.png" },
   ];
 
+  const handleLogout = () => {
+    // ✅ Clear storage correctly
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("role");
+    localStorage.removeItem("sellerId");
+    localStorage.removeItem("seller");
+
+    navigate("/seller/login", { replace: true }); // ✅ redirect to login
+  };
+
   return (
     <div className="dashboard-container">
       {/* Black Banner */}
       <header className="dashboard-top" role="banner">
         <div className="top-left">
           {/* Avatar with initials */}
-          <div className="avatar-placeholder">IN</div>
+          <div className="avatar-placeholder">
+            {sellerName.charAt(0).toUpperCase()}
+          </div>
 
           <div className="seller-info">
             <h2 className="seller-name">{sellerName}</h2>
             <p className="status">
-              <CheckCircle size={14} /> <span className="status-text">Verified Seller</span>
+              <CheckCircle size={14} />{" "}
+              <span className="status-text">Verified Seller</span>
             </p>
           </div>
         </div>
@@ -81,20 +93,18 @@ const Dashboard = () => {
               exit={{ opacity: 0, y: -8 }}
               className="dropdown-menu"
             >
-              <button className="dd-item"><User size={16} /> <span>My Profile</span></button>
+              <button className="dd-item">
+                <User size={16} /> <span>My Profile</span>
+              </button>
               <hr />
-              <button className="dd-item"
-  onClick={() => {
-    localStorage.removeItem("sellerToken");
-    window.location.href = "/seller/login"; // redirect to login
-  }}
->
-  <LogOut size={16}/> Logout
-</button>
+              <button className="dd-item" onClick={handleLogout}>
+                <LogOut size={16} /> Logout
+              </button>
             </motion.div>
           )}
         </div>
       </header>
+
       {/* Coupon Section */}
       <section className="coupon-section">
         <div className="coupon-card">
@@ -111,7 +121,13 @@ const Dashboard = () => {
         {/* Features Grid */}
         <section className="features-section" aria-label="Quick actions">
           {features.map((f, i) => (
-            <motion.div whileHover={{ scale: 1.03 }} key={i} className="feature-card" role="button" onClick={() => navigate(f.path)}>
+            <motion.div
+              whileHover={{ scale: 1.03 }}
+              key={i}
+              className="feature-card"
+              role="button"
+              onClick={() => f.path && navigate(f.path)}
+            >
               <f.icon size={28} />
               <p className="feature-title">{f.title}</p>
             </motion.div>
@@ -123,7 +139,11 @@ const Dashboard = () => {
           <h2>Featured Products</h2>
           <div className="products-grid">
             {products.map((p, i) => (
-              <motion.div whileHover={{ scale: 1.03 }} key={i} className="product-card">
+              <motion.div
+                whileHover={{ scale: 1.03 }}
+                key={i}
+                className="product-card"
+              >
                 <img src={p.img} alt={p.title} />
                 <h3>{p.title}</h3>
                 <p className="price">{p.price}</p>
@@ -174,12 +194,31 @@ const Dashboard = () => {
       </footer>
 
       {/* Bottom Nav (mobile only) */}
-      <nav className="bottom-nav" role="navigation" aria-label="Mobile navigation">
-        <div className="nav-item"><Home size={20} /><span>Home</span></div>
-        <div className="nav-item"><Grid size={20} /><span>Category</span></div>
-        <div className="nav-item"><Search size={20} /><span>Find</span></div>
-        <div className="nav-item"><ShoppingCart size={20} /><span>Cart</span></div>
-        <div className="nav-item"><UserCircle size={20} /><span>My</span></div>
+      <nav
+        className="bottom-nav"
+        role="navigation"
+        aria-label="Mobile navigation"
+      >
+        <div className="nav-item">
+          <Home size={20} />
+          <span>Home</span>
+        </div>
+        <div className="nav-item">
+          <Grid size={20} />
+          <span>Category</span>
+        </div>
+        <div className="nav-item">
+          <Search size={20} />
+          <span>Find</span>
+        </div>
+        <div className="nav-item">
+          <ShoppingCart size={20} />
+          <span>Cart</span>
+        </div>
+        <div className="nav-item">
+          <UserCircle size={20} />
+          <span>My</span>
+        </div>
       </nav>
     </div>
   );

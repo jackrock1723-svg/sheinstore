@@ -18,7 +18,7 @@ require("./models/product");
 // Routes
 const adminAuthRoutes = require("./routes/adminAuth");
 const adminPanelRoutes = require("./routes/adminPanel");
-const orderRoutes = require("./routes/order");
+const orderRoutes = require("./routes/orders");
 const sellerRoutes = require("./routes/seller");
 const adminRoutes = require("./routes/admin");
 const productRoutes = require("./routes/product");
@@ -71,13 +71,14 @@ app.use(express.json());
 // ------------------ Auth/Admin Routes ------------------
 app.use("/api/admin/auth", adminAuthRoutes);
 app.use("/api/admin/sellers", adminPanelRoutes);
-app.use("/api/wallet", walletRoutes);
 app.use("/api/shopify", shopifyRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/auth", require("./routes/magicAuth"));
 app.use("/api/seller/auth", require("./routes/sellerAuth"));
 app.use("/api/public-seller", publicSellerRoutes);
 app.use('/auth', require('./routes/auth'));
+app.use("/api/wallet", require("./routes/wallet"));
+
 
 
 

@@ -1,29 +1,37 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import "./wallet.css";
 import api from "../utils/api";
+import "./wallet.css";
+
 export default function WalletPage() {
   const [wallet, setWallet] = useState(null);
   const [loading, setLoading] = useState(true);
   const [withdrawAmount, setWithdrawAmount] = useState("");
 
-  const sellerId = localStorage.getItem("sellerId"); // must be set after login
-  const token = localStorage.getItem("token");
+  const seller = JSON.parse(localStorage.getItem("seller"));
+  const token = localStorage.getItem("sellerToken");
 
-  // Fetch wallet
+  const sellerId = seller?._id; // ✅ Now this should exist
+
   useEffect(() => {
     const fetchWallet = async () => {
+      if (!sellerId) {
+        console.error("❌ No sellerId found");
+        setLoading(false);
+        return;
+      }
+
       try {
         const res = await api.get(`/api/wallet/${sellerId}`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {}
+          headers: { Authorization: `Bearer ${token}` },
         });
         setWallet(res.data);
       } catch (err) {
-        console.error("fetch wallet error", err);
+        console.error("❌ fetch wallet error", err.response?.data || err.message);
       } finally {
         setLoading(false);
       }
     };
+
     fetchWallet();
   }, [sellerId, token]);
 
@@ -37,10 +45,10 @@ export default function WalletPage() {
       const res = await api.post(
         `/api/wallet/withdraw/${sellerId}`,
         { amount: Number(withdrawAmount), method: "UPI" },
-        { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      setWallet(res.data.wallet); // update UI with new wallet
+      setWallet(res.data.wallet);
       setWithdrawAmount("");
       alert("Withdrawal request successful ✅");
     } catch (err) {
@@ -53,7 +61,6 @@ export default function WalletPage() {
 
   return (
     <div className="wallet-container">
-      {/* Seller profile header */}
       <div className="wallet-header">
         <img
           src={`https://ui-avatars.com/api/?name=${wallet.owner?.name || "S"}`}
@@ -66,13 +73,11 @@ export default function WalletPage() {
         </div>
       </div>
 
-      {/* Balance card */}
       <div className="wallet-balance-card">
         <h3>Wallet Balance</h3>
         <p className="balance">₹{wallet.balance.toFixed(2)}</p>
       </div>
 
-      {/* Withdraw section */}
       <div className="wallet-withdraw">
         <input
           type="number"
@@ -83,7 +88,6 @@ export default function WalletPage() {
         <button onClick={handleWithdraw}>Withdraw</button>
       </div>
 
-      {/* Transaction history */}
       <div className="wallet-history">
         <h3>Transaction History</h3>
         {wallet.history.length === 0 ? (

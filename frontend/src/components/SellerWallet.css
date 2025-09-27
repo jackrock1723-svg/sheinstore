@@ -1,0 +1,59 @@
+.wallet-container {
+  padding: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.wallet-balance {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #2e7d32;
+  margin-bottom: 20px;
+}
+
+.wallet-history {
+  margin: 20px 0;
+}
+
+.wallet-history ul {
+  list-style: none;
+  padding: 0;
+}
+
+.wallet-history li {
+  padding: 8px 12px;
+  border-bottom: 1px solid #eee;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.withdraw-form {
+  margin-top: 20px;
+}
+
+.withdraw-form input,
+.withdraw-form select {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.withdraw-form button {
+  background: #2e7d32;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.withdraw-form button:hover {
+  background: #1b5e20;
+}
