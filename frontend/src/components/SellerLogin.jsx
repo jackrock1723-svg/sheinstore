@@ -1,4 +1,3 @@
-// src/components/SellerLogin.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -10,24 +9,26 @@ export default function SellerLogin() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  const API_BASE = process.env.REACT_APP_BACKEND_URL || "http://localhost:5000";
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const res = await axios.post(
-        `${process.env.REACT_APP_BACKEND_URL}/api/seller/login`,
-        { email, password }
-      );
+      const res = await axios.post(`${API_BASE}/api/seller/login`, {
+        email,
+        password,
+      });
 
-      // ✅ Standardize localStorage keys to match App.js
-      localStorage.setItem("sellerToken", res.data.token);
+      console.log("✅ Seller login response:", res.data);
+
+      // ⚡ Store in standard keys used by ProtectedRoute
+      localStorage.setItem("authToken", res.data.token);
       localStorage.setItem("role", "seller");
       localStorage.setItem("seller", JSON.stringify(res.data.seller));
-      localStorage.setItem("sellerId", res.data.seller.id || res.data.seller._id); // ✅ Save sellerId
+      localStorage.setItem("sellerId", res.data.seller.id || res.data.seller._id);
 
-
-      // Redirect to dashboard
       navigate("/seller/dashboard");
     } catch (err) {
       console.error("❌ Login error", err.response?.data || err.message);
