@@ -2,7 +2,7 @@
 import axios from "axios";
 import { getSellerToken, clearSellerToken } from "./auth";
 
-const API_BASE = process.env.REACT_APP_BACKEND_URL || "https://api.shienstore.com/";
+const API_BASE = process.env.REACT_APP_BACKEND_URL;
 
 const api = axios.create({
   baseURL: API_BASE,
