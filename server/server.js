@@ -30,12 +30,6 @@ const walletRoutes = require("./routes/wallet");
 const webhooksRoutes = require("./routes/webhooks");
 const publicSellerRoutes = require("./routes/publicSeller");
 
-// Allowed origins
-const allowedOrigins = [
-  "https://shienstore.com/",
-  "https://seller.shienstore.com/",
-];
-
 // Initialize app
 const app = express();
 
