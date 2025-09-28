@@ -8,7 +8,7 @@ const fs = require("fs");
 const Order = require("../models/order");
 const Wallet = require("../models/wallet");
 const Seller = require("../models/seller");
-const authMiddleware = require("../middleware/authMiddleware");
+const authMiddleware = require("../middleware/authMiddleware"); // ✅ import auth
 
 // ------------------ Ensure uploads dir ------------------
 const uploadPath = path.join(__dirname, "..", "uploads", "payment_proofs");
@@ -29,43 +29,53 @@ const upload = multer({ storage });
 // ------------------ Seller requests shipment + uploads payment proof ------------------
 /**
  * POST /api/shipment/request
+ * Auth: Seller only
  * Fields: productId, productTitle, price, earn
  * File: screenshot
  */
-router.post("/request", authMiddleware(["seller"]), upload.single("screenshot"), async (req, res) => {
-  try {
-    const { productId, productTitle, price, earn } = req.body;
-    const sellerId = req.user.id; // ✅ get from token
-    const screenshotUrl = req.file ? `/uploads/payment_proofs/${req.file.filename}` : null;
+router.post(
+  "/request",
+  authMiddleware(["seller"]), // ✅ only sellers can call this
+  upload.single("screenshot"),
+  async (req, res) => {
+    try {
+      const { productId, productTitle, price, earn } = req.body;
+      const sellerId = req.user.id; // ✅ seller from token
+      const screenshotUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
-    if (!productId || !productTitle) {
-      return res.status(400).json({ error: "Missing required fields" });
+      if (!sellerId || !productId || !productTitle) {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
+
+      const order = new Order({
+        sellerId,
+        productId,
+        productTitle,
+        price: Number(price),
+        earn: Number(earn),
+        status: "payment_pending",
+        payment: {
+          method: "UPI",
+          screenshotUrl,
+          status: "pending",
+        },
+        shipment: { requestedAt: new Date() },
+      });
+
+      await order.save();
+      res.status(201).json({ message: "Order created", order });
+    } catch (err) {
+      console.error("❌ shipment request error", err);
+      res.status(500).json({ error: "Failed to create order" });
     }
-
-    const order = new Order({
-      sellerId,
-      productId,
-      productTitle,
-      price: Number(price || 0),
-      earn: Number(earn || 0),
-      status: "payment_pending",
-      payment: {
-        method: "UPI",
-        screenshotUrl,
-        status: "pending",
-      },
-      shipment: { requestedAt: new Date() },
-    });
-
-    await order.save();
-    res.status(201).json({ message: "Order created", order });
-  } catch (err) {
-    console.error("❌ shipment request error", err);
-    res.status(500).json({ error: "Failed to create order" });
   }
-});
+);
 
 // ------------------ Admin manually verifies or rejects payment ------------------
+/**
+ * POST /api/shipment/verify/:orderId
+ * body: { action: "verify" | "reject" }
+ */
 router.post("/verify/:orderId", async (req, res) => {
   try {
     const { orderId } = req.params;

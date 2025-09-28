@@ -8,9 +8,6 @@ export default function ChatModal({ open, onClose, order, onConfirmed }) {
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef(null);
 
-  // ✅ fetch sellerId from localStorage
-  const sellerId = localStorage.getItem("sellerId");
-
   useEffect(() => {
     if (open && order) {
       setMessages([
@@ -88,18 +85,12 @@ export default function ChatModal({ open, onClose, order, onConfirmed }) {
     const file = e.target.files[0];
     if (!file) return;
 
-    if (!sellerId) {
-      addBot("⚠️ Seller ID missing. Please log in again.");
-      return;
-    }
-
     setUploading(true);
     addUser("📤 Uploaded payment screenshot.");
 
     try {
       const form = new FormData();
       form.append("screenshot", file); // ✅ must match backend
-      form.append("sellerId", sellerId); // ✅ ensure sellerId is included
       form.append("productId", order?.id || order?._id || "");
       form.append("productTitle", order?.title || order?.productName);
       form.append("price", order?.variants?.[0]?.price || order?.price || 0);
@@ -108,8 +99,13 @@ export default function ChatModal({ open, onClose, order, onConfirmed }) {
         ((order?.variants?.[0]?.price || order?.price || 0) * 0.2).toFixed(2)
       );
 
+      const token = localStorage.getItem("authToken");
+
       const res = await api.post("/api/shipment/request", form, {
-        headers: { "Content-Type": "multipart/form-data" },
+        headers: {
+          Authorization: `Bearer ${token}`, // ✅ backend uses this
+          "Content-Type": "multipart/form-data",
+        },
       });
 
       addBot(

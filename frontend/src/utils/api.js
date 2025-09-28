@@ -1,6 +1,6 @@
 // src/utils/api.js
 import axios from "axios";
-import { getSellerToken, clearSellerToken } from "./auth";
+import { getAuthToken, clearAuthToken } from "./auth";
 
 const API_BASE = process.env.REACT_APP_BACKEND_URL || "http://localhost:5000";
 
@@ -10,9 +10,8 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const token = getSellerToken();
+  const token = getAuthToken();
   if (token) {
-    config.headers = config.headers || {};
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
@@ -22,8 +21,8 @@ api.interceptors.response.use(
   (res) => res,
   (error) => {
     if (error.response && error.response.status === 401) {
-      clearSellerToken();
-      window.location.href = "/"; // redirect if token expired
+      clearAuthToken();
+      window.location.href = "/seller/login"; // redirect if token expired
     }
     return Promise.reject(error);
   }

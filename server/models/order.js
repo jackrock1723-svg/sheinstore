@@ -1,10 +1,10 @@
-// models/order.js
 const mongoose = require("mongoose");
+const Wallet = require("./wallet");
 
 // ------------------ Payment Schema ------------------
 const PaymentSchema = new mongoose.Schema(
   {
-    method: { type: String }, // e.g., "UPI", "Razorpay", "Netbanking"
+    method: { type: String }, // e.g., "UPI", "Razorpay"
     screenshotUrl: { type: String }, // file path or external URL
     status: {
       type: String,
@@ -12,7 +12,7 @@ const PaymentSchema = new mongoose.Schema(
       default: "pending",
     },
     verifiedAt: { type: Date },
-    uploadedAt: { type: Date, default: Date.now }, // 🆕 when proof uploaded
+    uploadedAt: { type: Date, default: Date.now },
   },
   { _id: false }
 );
@@ -41,25 +41,23 @@ const OrderSchema = new mongoose.Schema(
     price: { type: Number, required: true, default: 0 },
     earn: { type: Number, required: true, default: 0 },
 
-    // overall order status
+    orderId: { type: String, unique: true }, // ✅ Friendly order id
+
     status: {
       type: String,
       enum: [
-        "payment_pending",  // waiting for seller to pay + upload proof
-        "payment_verified", // proof verified by admin
+        "payment_pending",
+        "payment_verified",
         "shipped",
         "in_transit",
         "delivered",
-        "completed",        // ✅ auto after 2 days delivered
+        "completed",
         "cancelled",
       ],
       default: "payment_pending",
     },
 
-    // payment info
     payment: { type: PaymentSchema, default: () => ({}) },
-
-    // shipment info
     shipment: { type: ShipmentSchema, default: () => ({}) },
   },
   { timestamps: true }
@@ -67,11 +65,51 @@ const OrderSchema = new mongoose.Schema(
 
 // ------------------ Hooks ------------------
 
-// keep updatedAt fresh (timestamps already does this, but extra safeguard)
+// Generate friendly orderId
 OrderSchema.pre("save", function (next) {
+  if (!this.orderId) {
+    this.orderId = "ORD-" + Date.now().toString().slice(-6); // e.g., ORD-483920
+  }
   this.updatedAt = Date.now();
   next();
 });
+
+// Wallet credit logic
+OrderSchema.post("save", async function (doc, next) {
+  try {
+    // Only credit once
+    if (["payment_verified", "completed"].includes(doc.status) && !doc.walletCredited) {
+      const totalAmount = Number(doc.price) + Number(doc.earn);
+
+      let wallet = await Wallet.findOne({ sellerId: doc.sellerId });
+      if (!wallet) {
+        wallet = new Wallet({
+          sellerId: doc.sellerId,
+          balance: 0,
+          history: [],
+        });
+      }
+
+      wallet.balance += totalAmount;
+      wallet.history.push({
+        type: "credit",
+        amount: totalAmount,
+        note: `Earnings from order ${doc.orderId}`,
+        date: new Date(),
+      });
+
+      await wallet.save();
+
+      // mark as credited
+      doc.walletCredited = true;
+      await doc.save();
+    }
+  } catch (err) {
+    console.error("❌ Wallet update error:", err);
+  }
+  next();
+});
+
 
 // ------------------ Export ------------------
 module.exports =

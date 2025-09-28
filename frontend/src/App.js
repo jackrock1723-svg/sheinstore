@@ -15,6 +15,9 @@ import UsersPage from "./admin/UsersPage";
 import MerchantsPage from "./admin/MerchantsPage";
 import WalletsPage from "./admin/WalletsPage";
 import AdminWithdrawals from "./admin/AdminWithdrawals";
+import AdminOrders from "./admin/AdminOrders";
+import SellerOrders from "./components/SellerOrders";
+import SellerSettings from "./components/SellerSettings";
 
 // ✅ Generic Protected Route
 function ProtectedRoute({ children, roleRequired }) {
@@ -67,15 +70,34 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+  path="/orders"
+  element={
+    <ProtectedRoute roleRequired="seller">
+      <SellerOrders />
+    </ProtectedRoute>
+  }
+/>
+
 
         <Route
           path="/wallet"
           element={
             <ProtectedRoute roleRequired="seller">
-              <SellerWallet sellerId={localStorage.getItem("sellerId")} />
+              <SellerWallet />
             </ProtectedRoute>
           }
         />
+
+        <Route
+  path="/settings"
+  element={
+    <ProtectedRoute roleRequired="seller">
+      <SellerSettings />
+    </ProtectedRoute>
+  }
+/>
+
 
         {/* ---------------- Admin Routes ---------------- */}
         <Route path="/admin/login" element={<AdminLogin />} />
@@ -94,6 +116,8 @@ function App() {
           <Route path="merchants" element={<MerchantsPage />} />
           <Route path="wallets" element={<WalletsPage />} />
           <Route path="withdrawals" element={<AdminWithdrawals />} />
+          <Route path="orders" element={<AdminOrders />} />
+          <Route path="settings" element={<SellerSettings />} />
         </Route>
 
         {/* ---------------- Default Fallback ---------------- */}

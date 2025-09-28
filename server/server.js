@@ -32,8 +32,8 @@ const publicSellerRoutes = require("./routes/publicSeller");
 
 // Allowed origins
 const allowedOrigins = [
-  "http://localhost:3000",
-  "https://cosmic-cannoli-cb773e.netlify.app",
+  "https://shienstore.com/",
+  "https://seller.shienstore.com/",
 ];
 
 // Initialize app
@@ -60,7 +60,6 @@ app.use(cors({ origin: "*", credentials: true }));
 app.use("/webhooks", express.raw({ type: "application/json" }), require("./routes/webhooks"));
 
 // after app initialization and uploads static setup
-app.use("/uploads", express.static(path.join(__dirname, "uploads"))); // you already have this
 
 // Add this line:
 
@@ -78,6 +77,12 @@ app.use("/api/seller/auth", require("./routes/sellerAuth"));
 app.use("/api/public-seller", publicSellerRoutes);
 app.use('/auth', require('./routes/auth'));
 app.use("/api/wallet", require("./routes/wallet"));
+app.use("/api/admin/orders", require("./routes/adminOrders"));
+app.use("/api/admin", walletRoutes);
+app.use("/api/seller", require("./routes/seller"));
+
+
+
 
 
 
@@ -215,6 +220,7 @@ cron.schedule("*/1 * * * *", async () => {
   }
 });
 
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // ------------------ Other Routes ------------------
 app.use("/api/seller", sellerRoutes);
 app.use("/api/product", productRoutes);

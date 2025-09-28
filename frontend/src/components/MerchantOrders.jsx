@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { saveTokenFromUrl, getSellerToken } from "../utils/auth";
+import { saveTokenFromUrl, getSellerToken, getAuthToken } from "../utils/auth";
 import api from "../utils/api";
 import OrderCard from "./OrderCard";
 import ChatModal from "./ChatModal";
@@ -20,7 +20,7 @@ export default function MerchantOrders() {
   useEffect(() => {
     const fetchSeller = async () => {
       try {
-        const token = getSellerToken();
+        const token = getAuthToken();
         if (!token) {
           setLoading(false);
           return;

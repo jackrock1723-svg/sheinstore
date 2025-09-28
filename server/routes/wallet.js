@@ -4,43 +4,71 @@ const router = express.Router();
 const Wallet = require("../models/wallet");
 const Seller = require("../models/seller");
 const Withdraw = require("../models/withdraw");
+const authMiddleware = require("../middleware/authMiddleware");
 
-// 🟢 Get seller wallet (auto-create if missing)
-router.get("/:sellerId", async (req, res) => {
+// Get wallet by sellerId
+router.get("/:sellerId", authMiddleware(["seller", "admin"]), async (req, res) => {
   try {
-    let wallet = await Wallet.findOne({ ownerId: req.params.sellerId });
-    if (!wallet) {
-      const seller = await Seller.findById(req.params.sellerId);
-      if (!seller) return res.status(404).json({ error: "Seller not found" });
+    const { sellerId } = req.params;
 
-      wallet = new Wallet({ ownerId: seller._id, balance: 0, history: [] });
+    let wallet = await Wallet.findOne({ sellerId });
+
+    // if no wallet yet → create new
+    if (!wallet) {
+      wallet = new Wallet({
+        sellerId,
+        balance: 0,
+        history: []
+      });
       await wallet.save();
     }
+
     res.json(wallet);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("❌ wallet fetch error:", err);
+    res.status(500).json({ error: "Failed to fetch wallet" });
   }
 });
 
-// 🟡 Create withdraw request
-router.post("/withdraw/:sellerId", async (req, res) => {
+// Withdraw request
+router.post("/withdraw/:sellerId", authMiddleware(["seller"]), async (req, res) => {
   try {
     const { amount, method, bankDetails } = req.body;
-    const sellerId = req.params.sellerId;
-
-    const wallet = await Wallet.findOne({ ownerId: sellerId });
+    let wallet = await Wallet.findOne({ sellerId: req.params.sellerId });
     if (!wallet) return res.status(404).json({ error: "Wallet not found" });
 
-    if (amount <= 0 || amount > wallet.balance) {
-      return res.status(400).json({ error: "Invalid amount" });
+    if (amount > wallet.balance) return res.status(400).json({ error: "Insufficient balance" });
+
+    wallet.balance -= amount;
+    wallet.history.push({
+      type: "debit",
+      amount,
+      note: `Withdrawal (${method})`,
+    });
+
+    await wallet.save();
+    res.json(wallet);
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// Admin: credit seller wallet manually
+router.post("/admin/credit/:sellerId", authMiddleware(["admin"]), async (req, res) => {
+  try {
+    const { amount, note } = req.body;
+    let wallet = await Wallet.findOne({ sellerId: req.params.sellerId });
+    if (!wallet) {
+      wallet = new Wallet({ sellerId: req.params.sellerId, balance: 0, history: [] });
     }
 
-    const withdraw = new Withdraw({ sellerId, amount, method, bankDetails });
-    await withdraw.save();
+    wallet.balance += amount;
+    wallet.history.push({ type: "credit", amount, note: note || "Admin credit" });
 
-    res.json({ message: "Withdraw request created", withdraw });
+    await wallet.save();
+    res.json(wallet);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "Server error" });
   }
 });
 

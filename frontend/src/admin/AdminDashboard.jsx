@@ -1,4 +1,3 @@
-// src/admin/AdminDashboard.jsx
 import React from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 
@@ -10,6 +9,18 @@ export default function AdminDashboard() {
     localStorage.removeItem("role");
     localStorage.removeItem("admin");
     navigate("/admin/login");
+  };
+
+  const linkStyle = {
+    color: "#fff",
+    textDecoration: "none",
+    padding: "8px 12px",
+    borderRadius: "4px",
+  };
+
+  const activeStyle = {
+    background: "#334155",
+    fontWeight: "bold",
   };
 
   return (
@@ -29,24 +40,56 @@ export default function AdminDashboard() {
         <div>
           <h2 style={{ marginBottom: 20 }}>Admin Panel</h2>
           {/* Sidebar */}
-<nav style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-  <NavLink to="/admin/dashboard/sellers" style={{ color: "#fff" }}>
-    👨‍💼 Sellers
-  </NavLink>
-  <NavLink to="/admin/dashboard/users" style={{ color: "#fff" }}>
-    👥 Users
-  </NavLink>
-  <NavLink to="/admin/dashboard/merchants" style={{ color: "#fff" }}>
-    🛒 Merchants
-  </NavLink>
-  <NavLink to="/admin/dashboard/wallets" style={{ color: "#fff" }}>
-    💰 Wallets
-  </NavLink>
-  <NavLink to="/admin/dashboard/withdrawals" style={{ color: "#fff" }}>
-    💸 Withdrawals
-  </NavLink>
-</nav>
-
+          <nav style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <NavLink
+              to="/admin/dashboard/sellers"
+              style={({ isActive }) =>
+                isActive ? { ...linkStyle, ...activeStyle } : linkStyle
+              }
+            >
+              👨‍💼 Sellers
+            </NavLink>
+            <NavLink
+              to="/admin/dashboard/users"
+              style={({ isActive }) =>
+                isActive ? { ...linkStyle, ...activeStyle } : linkStyle
+              }
+            >
+              👥 Users
+            </NavLink>
+            <NavLink
+              to="/admin/dashboard/merchants"
+              style={({ isActive }) =>
+                isActive ? { ...linkStyle, ...activeStyle } : linkStyle
+              }
+            >
+              🛒 Merchants
+            </NavLink>
+            <NavLink
+              to="/admin/dashboard/wallets"
+              style={({ isActive }) =>
+                isActive ? { ...linkStyle, ...activeStyle } : linkStyle
+              }
+            >
+              💰 Wallets
+            </NavLink>
+            <NavLink
+              to="/admin/dashboard/withdrawals"
+              style={({ isActive }) =>
+                isActive ? { ...linkStyle, ...activeStyle } : linkStyle
+              }
+            >
+              💸 Withdrawals
+            </NavLink>
+            <NavLink
+              to="/admin/dashboard/orders"
+              style={({ isActive }) =>
+                isActive ? { ...linkStyle, ...activeStyle } : linkStyle
+              }
+            >
+              📦 Orders
+            </NavLink>
+          </nav>
         </div>
 
         <button

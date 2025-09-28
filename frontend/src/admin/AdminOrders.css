@@ -1,0 +1,98 @@
+/* Orders Page */
+.admin-orders {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.admin-orders h2 {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Table */
+.orders-table {
+  width: 100%;
+  border-collapse: collapse;
+  border-radius: 12px;
+  overflow: hidden;
+  font-size: 14px;
+}
+
+.orders-table thead {
+  background: #f1f5f9;
+}
+
+.orders-table th,
+.orders-table td {
+  padding: 12px 14px;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.orders-table th {
+  font-weight: 600;
+  color: #334155;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+.orders-table tr:hover {
+  background: #f9fafb;
+}
+
+/* Status Badges */
+.status {
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.status.completed { background: #dcfce7; color: #15803d; }
+.status.cancelled { background: #fee2e2; color: #b91c1c; }
+.status.delivered { background: #dbeafe; color: #1d4ed8; }
+.status.payment_verified { background: #d1fae5; color: #047857; }
+.status.payment_pending { background: #fef3c7; color: #b45309; }
+.status.in_transit { background: #ede9fe; color: #6d28d9; }
+.status.shipped { background: #e0f2fe; color: #0369a1; }
+
+/* Action Buttons */
+.orders-table button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  margin: 2px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.orders-table button:hover {
+  transform: translateY(-1px);
+  opacity: 0.9;
+}
+
+.btn-edit { background: #3b82f6; color: #fff; }
+.btn-delete { background: #ef4444; color: #fff; }
+.btn-save { background: #22c55e; color: #fff; }
+.btn-cancel { background: #6b7280; color: #fff; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .orders-table {
+    display: block;
+    overflow-x: auto;
+  }
+}

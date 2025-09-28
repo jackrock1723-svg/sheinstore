@@ -1,0 +1,111 @@
+/* General Wallet Container */
+.wallet-container {
+  max-width: 900px;
+  margin: 30px auto;
+  padding: 25px;
+  background: #f9fafb;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  font-family: "Inter", sans-serif;
+}
+
+.wallet-container h2 {
+  margin-bottom: 20px;
+  font-size: 22px;
+  font-weight: 600;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Wallet Table */
+.wallet-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-top: 15px;
+}
+
+.wallet-table th,
+.wallet-table td {
+  padding: 12px 14px;
+  border: 1px solid #e5e7eb;
+  text-align: left;
+  font-size: 14px;
+}
+
+.wallet-table th {
+  background: #f3f4f6;
+  font-weight: 600;
+  color: #374151;
+}
+
+.wallet-table td {
+  color: #111827;
+}
+
+/* Credit & Debit text */
+.wallet-table td.credit {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.wallet-table td.debit {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+/* Action Buttons */
+.wallet-table button {
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.wallet-table button:hover {
+  transform: scale(1.05);
+}
+
+/* Credit button */
+.wallet-table button.credit-btn {
+  background: #16a34a;
+  color: #fff;
+}
+
+.wallet-table button.credit-btn:hover {
+  background: #15803d;
+}
+
+/* Withdraw button (if admin handles seller requests) */
+.wallet-table button.withdraw-btn {
+  background: #2563eb;
+  color: #fff;
+}
+
+.wallet-table button.withdraw-btn:hover {
+  background: #1d4ed8;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .wallet-container {
+    padding: 15px;
+  }
+
+  .wallet-table th,
+  .wallet-table td {
+    font-size: 12px;
+    padding: 8px;
+  }
+
+  .wallet-table button {
+    font-size: 12px;
+    padding: 5px 10px;
+  }
+}

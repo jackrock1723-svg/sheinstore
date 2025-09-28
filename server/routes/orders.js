@@ -79,6 +79,7 @@ router.get("/proofs/pending", authMiddleware(["admin"]), async (req, res) => {
 });
 
 // 👉 Admin: verify proof
+// 👉 Admin: verify proof
 router.post("/:orderId/proofs/:index/verify", authMiddleware(["admin"]), async (req, res) => {
   try {
     const { orderId, index } = req.params;
@@ -102,12 +103,27 @@ router.post("/:orderId/proofs/:index/verify", authMiddleware(["admin"]), async (
 
     await order.save();
 
-    res.json({ message: "✅ Proof verified. Order moved to Shipped.", order });
+    // ✅ Update Seller Wallet
+    let wallet = await Wallet.findOne({ sellerId: order.sellerId });
+    if (!wallet) {
+      wallet = new Wallet({ sellerId: order.sellerId, balance: 0, history: [] });
+    }
+    wallet.balance += order.earn;
+    wallet.history.push({
+      type: "credit",
+      amount: order.earn,
+      note: `Earnings from order ${order._id}`,
+      date: new Date()
+    });
+    await wallet.save();
+
+    res.json({ message: "Proof verified, order shipped & wallet updated", order });
   } catch (err) {
     console.error("verify proof error", err);
     res.status(500).json({ error: "Server error" });
   }
 });
+
 
 // 👉 Admin: reject proof
 router.post("/:orderId/proofs/:index/reject", authMiddleware(["admin"]), async (req, res) => {

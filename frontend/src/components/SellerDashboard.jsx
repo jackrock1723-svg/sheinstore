@@ -29,11 +29,9 @@ const Dashboard = () => {
 
   const features = [
     { icon: User, title: "Merchant", path: "/merchant" },
-    { icon: ShoppingBag, title: "Orders" },
+    { icon: ShoppingBag, title: "Orders", path: "/orders" },
     { icon: Wallet, title: "Wallet", path: "/wallet" },
-    { icon: MapPin, title: "Address" },
-    { icon: Package, title: "Products" },
-    { icon: Settings, title: "Settings" },
+    { icon: Settings, title: "Settings", path: "/settings" },
     { icon: Info, title: "About Us" },
     { icon: Download, title: "App Download" },
   ];

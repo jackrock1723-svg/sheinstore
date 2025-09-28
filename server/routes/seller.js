@@ -7,6 +7,7 @@ const bcrypt = require("bcrypt");
 const path = require("path");
 const generateToken = require("../utils/generateToken");
 const authSeller = require("../middleware/authMiddleware");
+const jwt = require("jsonwebtoken");
 
 
 // 🛡️ Protected seller route
@@ -83,6 +84,43 @@ router.get("/me", authMiddleware(["seller"]), async (req, res) => {
   }
 });
 
+// ✅ Get seller by ID
+router.get("/:id", async (req, res) => {
+  try {
+    const seller = await Seller.findById(req.params.id).select("-password");
+    if (!seller) {
+      return res.status(404).json({ error: "Seller not found" });
+    }
+    res.json(seller);
+  } catch (err) {
+    console.error("❌ fetch seller error:", err);
+    res.status(500).json({ error: "Failed to fetch seller" });
+  }
+});
+
+// ✅ Update seller profile (without email & password)
+router.put("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { email, password, ...updates } = req.body; // ignore email/password
+
+    const seller = await Seller.findByIdAndUpdate(
+      id,
+      { $set: updates },
+      { new: true, runValidators: true }
+    ).select("-password");
+
+    if (!seller) {
+      return res.status(404).json({ error: "Seller not found" });
+    }
+
+    res.json(seller);
+  } catch (err) {
+    console.error("❌ seller update error:", err);
+    res.status(500).json({ error: "Failed to update seller profile" });
+  }
+});
+
 
 
 
@@ -127,7 +165,11 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ error: "Invalid password" });
     }
 
-    const token = generateToken(seller._id, "seller");
+    const token = jwt.sign(
+      { id: seller._id, role: "seller" },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
 
     res.json({
       message: "Login successful",
