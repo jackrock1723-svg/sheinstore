@@ -10,7 +10,7 @@ export default function AdminLogin() {
 
   // 👇 Automatically switch between localhost (dev) and Render (prod)
   const API_BASE =
-    process.env.REACT_APP_BACKEND_URL || "http://localhost:5000";
+    process.env.REACT_APP_BACKEND_URL;
 
   const handleLogin = async (e) => {
     e.preventDefault();
