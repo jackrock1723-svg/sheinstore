@@ -34,39 +34,32 @@ const proofRoutes = require("./routes/proof");
 // Initialize app
 const app = express();
 
-// CORS
-app.use(cors({
-  origin: [
-    "https://seller.shienstore.com",
-    "https://shienstore.com"
-  ],
-  credentials: true
-}));
-
-// app.use(
-//   cors({
-//     origin: function (origin, callback) {
-//       if (!origin || allowedOrigins.includes(origin)) {
-//         callback(null, true);
-//       } else {
-//         callback(new Error("Not allowed by CORS"));
-//       }
-//     },
-//     credentials: true,
-//   })
-// );
+// ------------------ CORS ------------------
+app.use(
+  cors({
+    origin: ["https://seller.shienstore.com", "https://shienstore.com"],
+    credentials: true,
+  })
+);
 
 // ------------------ Webhooks ------------------
-// raw body parser ONLY for webhooks
-app.use("/webhooks", express.raw({ type: "application/json" }), require("./routes/webhooks"));
-
-// after app initialization and uploads static setup
-
-// Add this line:
-
+app.use(
+  "/webhooks",
+  express.raw({ type: "application/json" }),
+  require("./routes/webhooks")
+);
 
 // ------------------ Middlewares ------------------
 app.use(express.json());
+
+// ------------------ Ensure uploads folder ------------------
+const uploadsDir = path.join(__dirname, "uploads");
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir);
+}
+
+// ✅ Serve uploads statically for sellers (public access to their own proof)
+app.use("/uploads", express.static(uploadsDir));
 
 // ------------------ Auth/Admin Routes ------------------
 app.use("/api/admin/auth", adminAuthRoutes);
@@ -76,20 +69,15 @@ app.use("/api/admin", adminRoutes);
 app.use("/auth", require("./routes/magicAuth"));
 app.use("/api/seller/auth", require("./routes/sellerAuth"));
 app.use("/api/public-seller", publicSellerRoutes);
-app.use('/auth', require('./routes/auth'));
-app.use("/api/wallet", require("./routes/wallet"));
+app.use("/auth", authRoutes);
+app.use("/api/wallet", walletRoutes);
 app.use("/api/admin/orders", require("./routes/adminOrders"));
-app.use("/api/admin", walletRoutes);
-app.use("/api/seller", require("./routes/seller"));
+app.use("/api/seller", sellerRoutes);
 app.use("/api/proofs", proofRoutes);
-
-
-
-
-
-
-
-
+app.use("/api/product", productRoutes);
+app.use("/api/chat", chatRoutes);
+app.use("/api/shipment", shipmentRoutes);
+app.use("/api/orders", orderRoutes);
 
 // ------------------ AI-powered chat route ------------------
 app.post("/api/chat", async (req, res) => {
@@ -153,12 +141,6 @@ mongoose
 
 console.log("✅ Models loaded: Seller, Product");
 
-// ------------------ Ensure uploads folder ------------------
-const uploadsDir = path.join(__dirname, "uploads");
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir);
-}
-
 // ------------------ Cron job for shipments ------------------
 cron.schedule("*/1 * * * *", async () => {
   console.log("⏰ Cron job running...");
@@ -169,7 +151,7 @@ cron.schedule("*/1 * * * *", async () => {
     // 1️⃣ shipped → in_transit after 1 hour
     const toTransit = await Order.find({
       status: "shipped",
-      "shipment.shippedAt": { $lte: new Date(now - 1000 * 60 * 60) }, // >1 hour
+      "shipment.shippedAt": { $lte: new Date(now - 1000 * 60 * 60) },
     });
 
     for (const order of toTransit) {
@@ -183,7 +165,7 @@ cron.schedule("*/1 * * * *", async () => {
     const toDelivered = await Order.find({
       status: "in_transit",
       "shipment.inTransitAt": {
-        $lte: new Date(now - 1000 * 60 * 60 * 24 * 2), // >2 days
+        $lte: new Date(now - 1000 * 60 * 60 * 24 * 2),
       },
     });
 
@@ -221,24 +203,18 @@ cron.schedule("*/1 * * * *", async () => {
   }
 });
 
-
-// ------------------ Other Routes ------------------
-app.use("/api/seller", sellerRoutes);
-app.use("/api/product", productRoutes);
-app.use("/api/auth", authRoutes);
-app.use("/api/chat", chatRoutes);
-app.use("/api/shipment", shipmentRoutes);
-app.use("/api/orders", orderRoutes);
-
 // ------------------ Default route ------------------
 app.get("/", (req, res) => {
   res.send("Backend working 🚀");
 });
 
-// Ensure all errors still return CORS headers
+// ------------------ Global error handler ------------------
 app.use((err, req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*"); // or allowedOrigins[0] if you want strict
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+  );
 
   if (err instanceof Error) {
     console.error("❌ Global error handler:", err.message);
@@ -247,7 +223,6 @@ app.use((err, req, res, next) => {
 
   next();
 });
-
 
 // ------------------ Start server ------------------
 const PORT = process.env.PORT || 5000;
