@@ -127,18 +127,18 @@ export default function AdminOrders() {
           const res = await api.get(`/api/proofs/${filename}`, {
             responseType: "blob",
             headers: {
-              Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+              Authorization: `Bearer ${localStorage.getItem("authToken")}`, // ✅ send token
             },
           });
 
-          const blob = new Blob([res.data], { type: "image/png" });
-          const fileURL = window.URL.createObjectURL(blob);
-
+          const fileURL = window.URL.createObjectURL(res.data);
           const imgWindow = window.open();
-          imgWindow.document.write(`<img src="${fileURL}" style="max-width:100%;"/>`);
+          imgWindow.document.write(
+            `<img src="${fileURL}" style="max-width:100%;"/>`
+          );
         } catch (err) {
           console.error("❌ proof fetch error", err);
-          alert("Failed to load proof (check permissions).");
+          alert("Failed to load proof (check permissions or file path).");
         }
       }}
     >
@@ -148,6 +148,7 @@ export default function AdminOrders() {
     "—"
   )}
 </td>
+
 
 
 
