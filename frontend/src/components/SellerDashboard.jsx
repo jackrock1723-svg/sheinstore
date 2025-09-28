@@ -32,7 +32,7 @@ const Dashboard = () => {
     { icon: ShoppingBag, title: "Orders", path: "/orders" },
     { icon: Wallet, title: "Wallet", path: "/wallet" },
     { icon: Settings, title: "Settings", path: "/settings" },
-    { icon: Info, title: "About Us" },
+    { icon: Info, title: "About Us", path: "/about-us" },
     { icon: Download, title: "App Download" },
   ];
 

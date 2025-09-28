@@ -29,6 +29,7 @@ const shopifyRoutes = require("./routes/shopify");
 const walletRoutes = require("./routes/wallet");
 const webhooksRoutes = require("./routes/webhooks");
 const publicSellerRoutes = require("./routes/publicSeller");
+const proofRoutes = require("./routes/proof");
 
 // Initialize app
 const app = express();
@@ -80,6 +81,7 @@ app.use("/api/wallet", require("./routes/wallet"));
 app.use("/api/admin/orders", require("./routes/adminOrders"));
 app.use("/api/admin", walletRoutes);
 app.use("/api/seller", require("./routes/seller"));
+app.use("/api/proofs", proofRoutes);
 
 
 
@@ -156,7 +158,6 @@ const uploadsDir = path.join(__dirname, "uploads");
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir);
 }
-app.use("/uploads", express.static(uploadsDir));
 
 // ------------------ Cron job for shipments ------------------
 cron.schedule("*/1 * * * *", async () => {
@@ -220,7 +221,7 @@ cron.schedule("*/1 * * * *", async () => {
   }
 });
 
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
 // ------------------ Other Routes ------------------
 app.use("/api/seller", sellerRoutes);
 app.use("/api/product", productRoutes);

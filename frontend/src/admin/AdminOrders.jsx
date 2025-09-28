@@ -118,14 +118,42 @@ export default function AdminOrders() {
               </td>
               <td>{new Date(o.createdAt).toLocaleString()}</td>
               <td>
-                {o.payment?.screenshotUrl ? (
-                  <a href={o.payment.screenshotUrl} target="_blank" rel="noreferrer">
-                    View
-                  </a>
-                ) : (
-                  "—"
-                )}
-              </td>
+  {o.payment?.screenshotUrl ? (
+    <button
+      onClick={async () => {
+        try {
+          const filename = o.payment.screenshotUrl.split("/").pop();
+
+          const res = await api.get(`/api/proofs/${filename}`, {
+            responseType: "blob",
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+            },
+          });
+
+          const blob = new Blob([res.data], { type: "image/png" });
+          const fileURL = window.URL.createObjectURL(blob);
+
+          const imgWindow = window.open();
+          imgWindow.document.write(`<img src="${fileURL}" style="max-width:100%;"/>`);
+        } catch (err) {
+          console.error("❌ proof fetch error", err);
+          alert("Failed to load proof (check permissions).");
+        }
+      }}
+    >
+      View
+    </button>
+  ) : (
+    "—"
+  )}
+</td>
+
+
+
+
+
+
               <td>
                 {editing === o._id ? (
                   <>

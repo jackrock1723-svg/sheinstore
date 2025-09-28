@@ -18,6 +18,10 @@ import AdminWithdrawals from "./admin/AdminWithdrawals";
 import AdminOrders from "./admin/AdminOrders";
 import SellerOrders from "./components/SellerOrders";
 import SellerSettings from "./components/SellerSettings";
+import AboutUs from "./components/AboutUs";
+
+
+
 
 // ✅ Generic Protected Route
 function ProtectedRoute({ children, roleRequired }) {
@@ -88,6 +92,15 @@ function App() {
             </ProtectedRoute>
           }
         />
+        // ...
+<Route
+  path="/about-us"
+  element={
+    <ProtectedRoute roleRequired="seller">
+      <AboutUs />
+    </ProtectedRoute>
+  }
+/>
 
         <Route
   path="/settings"

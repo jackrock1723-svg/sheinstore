@@ -26,18 +26,35 @@ const SellerWallet = () => {
 
 
   const requestWithdraw = async () => {
-    try {
-      const res = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/wallet/withdraw/${sellerId}`, {
+  try {
+    const token = localStorage.getItem("authToken"); // get JWT
+    if (!token) {
+      alert("You are not logged in. Please log in again.");
+      return;
+    }
+
+    const res = await axios.post(
+      `${process.env.REACT_APP_BACKEND_URL}/api/wallet/withdraw/${sellerId}`,
+      {
         amount: Number(amount),
         method,
         bankDetails
-      });
-      alert("Withdraw request submitted!");
-      setAmount("");
-    } catch (err) {
-      alert(err.response?.data?.error || "Withdraw failed");
-    }
-  };
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,  // ✅ attach token
+        },
+      }
+    );
+
+    alert("✅ Withdraw request submitted! Wait for Admin Review");
+    setAmount("");
+  } catch (err) {
+    console.error("❌ withdraw error", err.response?.data || err.message);
+    alert(err.response?.data?.error || "Withdraw failed");
+  }
+};
+
 
   if (!wallet) return <p>Loading wallet...</p>;
 
