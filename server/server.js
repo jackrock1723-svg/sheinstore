@@ -29,7 +29,7 @@ const shopifyRoutes = require("./routes/shopify");
 const walletRoutes = require("./routes/wallet");
 const webhooksRoutes = require("./routes/webhooks");
 const publicSellerRoutes = require("./routes/publicSeller");
-const proofRoutes = require("./routes/proof");
+
 
 // Initialize app
 const app = express();
@@ -73,7 +73,6 @@ app.use("/auth", authRoutes);
 app.use("/api/wallet", walletRoutes);
 app.use("/api/admin/orders", require("./routes/adminOrders"));
 app.use("/api/seller", sellerRoutes);
-app.use("/api/proofs", proofRoutes);
 app.use("/api/product", productRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/shipment", shipmentRoutes);

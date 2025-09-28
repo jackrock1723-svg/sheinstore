@@ -124,7 +124,7 @@ export default function AdminOrders() {
         try {
           const filename = o.payment.screenshotUrl.split("/").pop();
 
-          const res = await api.get(`/api/proofs/${filename}`, {
+          const res = await api.get(`/api/admin/proofs/${filename}`, {
             responseType: "blob",
             headers: {
               Authorization: `Bearer ${localStorage.getItem("authToken")}`, // ✅ send token

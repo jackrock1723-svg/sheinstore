@@ -125,23 +125,35 @@ router.put("/sellers/:id/reject", authMiddleware(["admin"]), async (req, res) =>
   }
 });
 
+// routes/admin.js
 router.get("/proofs/:filename", authMiddleware(["admin"]), (req, res) => {
-  const filename = req.params.filename;
-  const proofPath = path.join(__dirname, "..", "uploads", "payment_proofs", filename);
+  try {
+    let filename = req.params.filename;
 
-  if (!fs.existsSync(proofPath)) {
-    return res.status(404).json({ error: "Proof not found" });
+    // extra safety
+    if (filename.includes("/")) {
+      filename = filename.split("/").pop();
+    }
+
+    const proofPath = path.join(__dirname, "..", "uploads", "payment_proofs", filename);
+
+    if (!fs.existsSync(proofPath)) {
+      return res.status(404).json({ error: "Proof not found" });
+    }
+
+    const ext = path.extname(filename).toLowerCase();
+    let contentType = "application/octet-stream";
+    if (ext === ".png") contentType = "image/png";
+    if (ext === ".jpg" || ext === ".jpeg") contentType = "image/jpeg";
+
+    res.setHeader("Content-Type", contentType);
+    res.sendFile(proofPath);
+  } catch (err) {
+    console.error("❌ proof fetch error:", err);
+    res.status(500).json({ error: "Failed to load proof" });
   }
-
-  // detect mime type from extension
-  const ext = path.extname(filename).toLowerCase();
-  let contentType = "application/octet-stream";
-  if (ext === ".png") contentType = "image/png";
-  if (ext === ".jpg" || ext === ".jpeg") contentType = "image/jpeg";
-
-  res.setHeader("Content-Type", contentType);
-  res.sendFile(proofPath);
 });
+  
 
 
 // Protected admin dashboard

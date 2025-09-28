@@ -41,7 +41,8 @@ router.post(
     try {
       const { productId, productTitle, price, earn } = req.body;
       const sellerId = req.user.id; // ✅ seller from token
-      const screenshotUrl = req.file ? `/uploads/${req.file.filename}` : null;
+      const screenshotUrl = req.file ? req.file.filename : null; // ✅ store only filename
+
 
       if (!sellerId || !productId || !productTitle) {
         return res.status(400).json({ error: "Missing required fields" });
