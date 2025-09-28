@@ -40,7 +40,13 @@ const allowedOrigins = [
 const app = express();
 
 // CORS
-app.use(cors({ origin: "*", credentials: true }));
+app.use(cors({
+  origin: [
+    "https://seller.shienstore.com",
+    "https://shienstore.com"
+  ],
+  credentials: true
+}));
 
 // app.use(
 //   cors({
