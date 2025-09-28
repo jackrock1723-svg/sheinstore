@@ -9,7 +9,7 @@ export default function SellerLogin() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const API_BASE = process.env.REACT_APP_BACKEND_URL || "https://api.shienstore.com/";
+  const API_BASE = process.env.REACT_APP_BACKEND_URL || "https://api.shienstore.com";
 
   const handleLogin = async (e) => {
     e.preventDefault();
